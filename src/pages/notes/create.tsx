@@ -1,7 +1,31 @@
+import React, { useState, useCallback } from 'react';
 import { NextPage } from "next";
 import Head from "next/head";
+import { trpc } from "../../utils/trpc";
+import { NoteForm } from '../../components/NoteForm';
+import Link from 'next/link';
+
+export interface INote {
+    title: string;
+    body: string;
+    type: string;
+}
 
 const CreateNote: NextPage = () => {
+    const [formData, setFormData] = useState<INote>({ title: "", body: "", type: ""});
+    const insertMutation = trpc.useMutation(["note.createNote"]);
+
+    const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
+        setFormData({
+            ...formData,
+            [e.currentTarget.id]: e.currentTarget.value,
+        })
+    }
+
+    const insertNote = useCallback(()  => {
+        insertMutation.mutate(formData);
+    }, [formData, insertMutation]);
+    
     return (<>
         <Head>
             <title>Create A Note</title>
@@ -9,7 +33,13 @@ const CreateNote: NextPage = () => {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="container mx-auto flex flex-col items-center justify-items min-h-screen p-4">
-            <h3 className="text-2xl">Create A Note</h3>
+            <h3 className="text-2xl mb-8">Create A Note</h3>
+            <NoteForm formValue={formData} onChange={handleForm} submit={insertNote} />
+            <Link href="/">
+                <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
+                    Go Back
+                </a>
+            </Link>
         </main>
     </>)
 }

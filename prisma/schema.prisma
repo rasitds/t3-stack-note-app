@@ -23,9 +23,6 @@ model Note {
     title String
     body  String
     type  String
-
-    User   User   @relation(fields: [userId], references: [id])
-    userId String
 }
 
 // Necessary for Next auth
@@ -63,7 +60,6 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    Note          Note[]
 }
 
 model VerificationToken {

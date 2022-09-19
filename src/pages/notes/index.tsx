@@ -1,10 +1,12 @@
 import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { trpc } from "../../utils/trpc";
 
 const Notes: NextPage = () => {
+  const notes = trpc.useQuery(["note.getNotes"]);
 
-    return (
+  return (
     <>
         <Head>
             <title>Notes</title>
@@ -14,16 +16,11 @@ const Notes: NextPage = () => {
         <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
           <h1 className="text-5xl mb-2">Notes</h1>
           <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-2 lg:w-2/3">
-            <NoteCard
-                title="note"
-                body="note"
-                type="1"
-            />
-            <NoteCard
-                title="note2"
-                body="note2"
-                type="2"
-            />
+            {notes.data?.map((note) => <NoteCard
+                title={note.title}
+                body={note.body}
+                type={note.type}
+            />)}
           </div>
           <nav className="flex justify-center space-x-4 space-x-4 mt-4">
             <Link href="/">
@@ -33,7 +30,8 @@ const Notes: NextPage = () => {
             </Link>
           </nav>
         </main>
-    </>)
+    </>
+  )
 }
 
 export default Notes;
