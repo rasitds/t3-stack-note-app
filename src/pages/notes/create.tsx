@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { NextPage } from "next";
 import Head from "next/head";
-import { trpc } from "../../utils/trpc";
+import { trpc } from "../_app";
 import { NoteForm } from '../../components/NoteForm';
 import Link from 'next/link';
+import { timeUntilStale } from 'react-query/types/core/utils';
 
 export interface INote {
     title: string;
@@ -13,7 +14,11 @@ export interface INote {
 
 const CreateNote: NextPage = () => {
     const [formData, setFormData] = useState<INote>({ title: "", body: "", type: ""});
-    const insertMutation = trpc.useMutation(["note.createNote"]);
+    const insertMutation = trpc.note.createNote.useMutation({
+        async onSuccess() {
+            alert("success");
+        }
+    });
 
     const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
         setFormData({

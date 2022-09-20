@@ -1,10 +1,10 @@
 import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { trpc } from "../../utils/trpc";
+import { trpc } from "../_app";
 
 const Notes: NextPage = () => {
-  const notes = trpc.useQuery(["note.getNotes"]);
+  const notes = trpc.note.getNotes.useQuery();
 
   return (
     <>

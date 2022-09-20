@@ -1,29 +1,31 @@
 import { z } from "zod";
-import { createRouter } from "./context";
-import { Prisma } from "@prisma/client";
+//import { Prisma } from "@prisma/client";
+import { t } from "../trpc";
+import { prisma } from "../db/client";
 
-const defaultNoteSelect = Prisma.validator<Prisma.NoteSelect>()({
+/*const defaultNoteSelect = Prisma.validator<Prisma.NoteSelect>()({
     title: true,
     body: true,
     type: true,
-});
+});*/
 
-export const noteRouter = createRouter()
-    .query('getNotes', {
-        async resolve({ ctx }) {
-            return await ctx.prisma.note.findMany();
+export const noteRouter = t.router({
+    getNotes: t.procedure.query(async () => {
+            return await prisma.note.findMany();
         },
-    })
-    .mutation('createNote', {
-        input: z.object({ title: z.string().min(5), body: z.string().min(5).max(200), type: z.string().min(4) }),
-        resolve: async ({ input, ctx }) => {
-            const { title, body, type } = input;
-            return await ctx.prisma.note.create({ 
-                data: {
-                    title: title,
-                    body: body,
-                    type: type,
-                },
-             });
-        },
-    });
+    ),
+    createNote: t.procedure
+    .input( z.object({ title: z.string().min(5), body: z.string().min(5).max(200), type: z.string().min(4) }) )
+    .mutation(async ({ input }) => {
+        const { title, body, type } = input;
+        const note = await prisma.note.create({ 
+            data: {
+                title: title,
+                body: body,
+                type: type,
+            },
+        });
+
+        return note;
+    }),
+});

@@ -1,23 +1,17 @@
-import { createRouter } from "./context";
+//import { createRouter } from "./context";
 import { z } from "zod";
+import { t } from "../trpc";
+import { prisma } from "../db/client";
 
-export const exampleRouter = createRouter()
-  .query("hello", {
-    input: z
-      .object({
-        text: z.string().nullish(),
-      })
-      .nullish(),
-    resolve({ input }) {
-      return {
-        greeting: `Hello ${input?.text ?? "world"}`,
-      };
-    },
-  })
-  .query("getTechnologyCards", {
-    resolve() {
-      return {
-        cards: [
+export const exampleRouter = t.router({
+  hello: t.procedure.input( z
+    .object({
+      text: z.string().nullish(),
+    })
+    .nullish()
+  ).query(({ input }) => `Hello ${input?.text ?? "world"}`),
+  getTechnologyCards: t.procedure.query(() => {
+      const cards = [
           { 
             name: "NextJS", 
             description: "The React framework for production", 
@@ -48,12 +42,11 @@ export const exampleRouter = createRouter()
             description: "Build data-driven JavaScript & TypeScript apps in less time", 
             documentation: "https://www.prisma.io/docs/"
           }
-        ],
-      }
-    }
-  })
-  .query("getAll", {
-    async resolve({ ctx }) {
-      return await ctx.prisma.example.findMany();
-    },
-  });
+      ];
+      return cards;
+  }),
+  getAll: t.procedure.query(async () => {
+    const examples = await prisma.example.findMany();
+    return examples;
+  }),
+});

@@ -1,10 +1,10 @@
 import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { trpc } from '../utils/trpc';
+import { trpc } from "./_app";
 
 const About: NextPage = () => {
-    const technologyCards = trpc.useQuery(["example.getTechnologyCards"]);
+    const technologyCards = trpc.example.getTechnologyCards.useQuery();
 
     return (
         <>
@@ -21,7 +21,7 @@ const About: NextPage = () => {
           </h1>
           <p className="text-2xl text-gray-700">This stack uses:</p>
           <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-2 lg:w-2/3">
-            {technologyCards.data?.cards.map((card) => 
+            {technologyCards.data?.map((card) => 
               <TechnologyCard
                 name={card.name}
                 description={card.description}

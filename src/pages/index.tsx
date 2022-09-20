@@ -1,13 +1,11 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { trpc } from "../utils/trpc";
+import { trpc } from "./_app";
 
 const Home: NextPage = () => {
-  const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
+  const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
   
-  const prismaExample = trpc.useQuery(["example.getAll"]);
-
   return (
     <>
       <Head>
@@ -39,7 +37,7 @@ const Home: NextPage = () => {
         </nav>
   
         <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
-          {hello.data ? <p>{hello.data.greeting}</p> : <p>Loading..</p>}
+          {hello.data ? <p>{hello.data}</p> : <p>Loading..</p>}
         </div>
       </main>
     </>
