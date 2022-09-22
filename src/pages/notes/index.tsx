@@ -1,10 +1,22 @@
 import { NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { NoteCard } from "../../components/NoteCard";
 import { trpc } from "../_app";
 
 const Notes: NextPage = () => {
   const notes = trpc.note.getNotes.useQuery();
+  
+  const deleteNoteMutation = trpc.note.deleteNote.useMutation({
+    onSuccess() {
+      alert("OK")
+    }
+  });
+
+  const deleteNote = (noteId: string) => {
+    deleteNoteMutation.mutate({ noteId });
+  }
 
   return (
     <>
@@ -16,11 +28,13 @@ const Notes: NextPage = () => {
         <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
           <h1 className="text-5xl mb-2">Notes</h1>
           <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-2 lg:w-2/3">
-            {notes.data?.map((note) => <NoteCard
+            {notes.data?.map((note, index) => <><button className="mt-8 text-lg text-gray-700 hover:border" onClick={(() => deleteNote(note.id))}>X</button><NoteCard
+                key={index}
+                id={note.id}
                 title={note.title}
                 body={note.body}
                 type={note.type}
-            />)}
+            /></>)}
           </div>
           <nav className="flex justify-center space-x-4 space-x-4 mt-4">
             <Link href="/">
@@ -35,27 +49,3 @@ const Notes: NextPage = () => {
 }
 
 export default Notes;
-
-type NoteCardProps = {
-    title: string;
-    body: string;
-    type: string;
-  };
-  
-  const NoteCard = ({
-    title,
-    body,
-    type,
-  }: NoteCardProps) => {
-    return (
-      <section className="flex flex-col justify-center p-6 duration-500 border-2 border-gray-500 rounded shadow-xl motion-safe:hover:scale-105">
-        <h2 className="text-lg text-gray-700">{title}</h2>
-        <h3
-          className="mt-3 text-sm underline text-violet-500 decoration-dotted underline-offset-2"
-        >
-          Type: {type}
-        </h3>
-        <p className="text-sm text-gray-600">{body}</p>
-      </section>
-    );
-  };

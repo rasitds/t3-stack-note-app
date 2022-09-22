@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NextPage } from "next";
 import Head from "next/head";
 import { trpc } from "../_app";
 import { NoteForm } from '../../components/NoteForm';
 import Link from 'next/link';
 import { timeUntilStale } from 'react-query/types/core/utils';
+
+import { Button, TextInput } from "flowbite-react";
 
 export interface INote {
     title: string;
@@ -13,23 +15,60 @@ export interface INote {
 }
 
 const CreateNote: NextPage = () => {
-    const [formData, setFormData] = useState<INote>({ title: "", body: "", type: ""});
+    const [formField, setFormField] = useState<INote>({ title: "", body: "", type: "" });
+    const [errorData, setErrorData] = useState<{ [x: string]: string[] | undefined; [x: number]: string[] | undefined; [x: symbol]: string[] | undefined; }>({ title: [], body: [], type: []});
+    
+    const { title, body, type } = formField;
+    
     const insertMutation = trpc.note.createNote.useMutation({
         async onSuccess() {
             alert("success");
+        },
+
+        async onError() {
+            if (insertMutation.error?.data?.zodError) {
+                const fieldErrors = insertMutation.error.data.zodError.fieldErrors;
+
+                setErrorData(fieldErrors);
+            }
         }
     });
 
-    const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
+    const handleFieldChange = (e: React.FormEvent<HTMLInputElement>): void => {
+        setFormField((formField) => ({
+            ...formField,
+            [e.target.name]: e.target.value,
+        }));
+    }
+
+    const hasError = (field: string | number) => {
+        return !!errorData[field];
+    }
+
+    const inputColors = (hasError: any) => hasError ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm focus:ring-red-500 focus:border-red-500 block" : "bg-emerald-50 border border-emerald-500 text-emerald-900 placeholder-emerald-700 text-sm focus:ring-emerald-500 focus:border-emerald-500 block";
+
+    const renderError = (field: string | number) => {
+        if (hasError(field)) {
+            return (
+                <p class="mt-2 text-red-500 text-sm">{errorData[field]}</p>
+            )
+        }
+    }
+
+    /*const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
         })
-    }
+    }*/
+
+    useEffect(() => {
+        insertMutation.mutate(formField);
+    }, [formField]);
 
     const insertNote = useCallback(()  => {
-        insertMutation.mutate(formData);
-    }, [formData, insertMutation]);
+        insertMutation.mutate(formField);
+    }, [formField, insertMutation]);
     
     return (<>
         <Head>
@@ -39,7 +78,25 @@ const CreateNote: NextPage = () => {
         </Head>
         <main className="container mx-auto flex flex-col items-center justify-items min-h-screen p-4">
             <h3 className="text-2xl mb-8">Create A Note</h3>
-            <NoteForm formValue={formData} onChange={handleForm} submit={insertNote} />
+            {/*<NoteForm formValue={formData} onChange={handleForm} submit={insertNote} />*/}
+            <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-900">Title</label>
+            <input type="text" name="title" onChange={handleFieldChange} value={title} required={true} className={`${inputColors(hasError("title"))}`} />
+            {renderError("title")}
+        </div>
+        <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-900">Body</label>
+            <textarea rows={4} name="body" onChange={handleFieldChange} value={body} required={true} className={`${inputColors(hasError("body"))}`}></textarea>
+            {renderError("body")}
+        </div>
+        <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-900">Type</label>
+            <input type="text" name="type" className={`${inputColors(hasError("type"))}`} onChange={handleFieldChange} value={type} />
+            {renderError("type")}
+        </div>
+        <div className="mb-6">
+            <Button color="purple" onClick={insertNote}>Send</Button>
+        </div>
             <Link href="/">
                 <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
                     Go Back

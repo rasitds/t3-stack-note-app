@@ -1,9 +1,12 @@
 import type { NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { UserButton } from "../components/UserButton";
 import { trpc } from "./_app";
 
 const Home: NextPage = () => {
+  const { data: session } = useSession();
   const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
   
   return (
@@ -18,22 +21,14 @@ const Home: NextPage = () => {
         <h1 className="text-5xl md:text-[4rem] leading-normal font-extrabold text-gray-700 mb-4">
           T3 Stack <span className="text-blue-600 sh">Note</span> App
         </h1>
+        {session?.user?.name}
         <nav className="flex justify-center space-x-4 space-x-4">
           <Link href="/about">
             <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
               About
             </a>
           </Link>
-          <Link href="/notes">
-            <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
-              Notes
-            </a>
-          </Link>
-          <Link href="/notes/create">
-            <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
-              Create A Note
-            </a>
-          </Link>
+          <UserButton />
         </nav>
   
         <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
