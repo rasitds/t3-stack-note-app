@@ -27,6 +27,7 @@ const Notes: NextPage = () => {
         </Head>
         <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
           <h1 className="text-5xl mb-2">Notes</h1>
+          { notes.data?.length ? 
           <div className="grid gap-3 pt-3 mt-3 text-center md:grid-cols-2 lg:w-2/3">
             {notes.data?.map((note, index) => <><button className="mt-8 text-lg text-gray-700 hover:border" onClick={(() => deleteNote(note.id))}>X</button><NoteCard
                 key={index}
@@ -34,8 +35,10 @@ const Notes: NextPage = () => {
                 title={note.title}
                 body={note.body}
                 type={note.type}
-            /></>)}
+            /></>)
+            }
           </div>
+          : <div>No notes yet.</div> }
           <nav className="flex justify-center space-x-4 space-x-4 mt-4">
             <Link href="/">
                 <a className="border border-indigo-800 border-slate-300 hover:border-slate-400 px-3 py-2 text-slate-700 hover:bg-slate-100  hover:text-slate-900">
