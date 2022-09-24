@@ -23,4 +23,5 @@ export const NoteCard = ({
         <p className="text-sm text-gray-600">{body}</p>
       </section>
     );
+    
 };
